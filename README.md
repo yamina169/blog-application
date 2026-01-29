@@ -1,37 +1,60 @@
-# Social Platform Microservices
+# Social App
 
 ## Description
 
-Social Platform Microservices is a **simplified social platform** built using a **microservices architecture**:
+**Social App** is a **monolithic application** where users can **register, login, update profiles, search users, follow/unfollow, create posts, and comment**.
+The app is built using **NestJS** for the backend, **React** for the frontend, and includes **AI-powered features** for enhanced user experience.
 
-- **Auth Service**: User registration, login, JWT authentication, roles, and security.
-- **Profile Service**: User profile management, follow/unfollow functionality.
-- **Blog Service**: CRUD articles, file uploads, automatic AI-generated article summaries.
-- **Notifications Worker**: Asynchronous notifications using queues (BullMQ / RabbitMQ).
-- **API Gateway**: Single entry point for the frontend with routing to microservices.
-- **Frontend**: React Web or React Native client interacting with the API.
+This project was initially planned as a microservices architecture but was refactored into a **monolith** for simpler development and easier Dockerization on low-resource PCs.
 
-The project is **dockerized** and includes **unit and e2e tests**, ready for **CI/CD and scalability**.
+## Features
 
----
+- User **authentication** (login/register)
+- **Profile management** (update profile, view profile)
+- **Follow/unfollow users**
+- **Create posts**
+- **Comment on posts**
+- **Search users**
+- **AI-powered features** (optional enhancements)
 
-## Table of Contents
+## Getting Started
 
-1. [Installation](#installation)
-2. [Services](#services)
-3. [Docker](#docker)
-4. [Tests](#tests)
-5. [Usage](#usage)
-6. [Technologies](#technologies)
-7. [Architecture](#architecture)
+### Backend with Docker
 
----
-
-## Installation
-
-Clone the repository:
+1. Build and run the backend and MongoDB:
 
 ```bash
-git clone https://github.com/<your-username>/social-platform-microservices.git
-cd social-platform-microservices
+docker-compose up --build
 ```
+
+2. Backend runs on: `http://localhost:3000`
+
+### Frontend
+
+1. Install dependencies:
+
+```bash
+cd social-app-frontend
+npm install
+```
+
+2. Run the React app:
+
+```bash
+npm start
+```
+
+3. Frontend runs on: `http://localhost:3001` (or default React port)
+
+## Notes
+
+- The project uses a **monolithic architecture** for easier development on low-resource machines.
+- All modules communicate internally using NestJS services.
+- Later, the app can be refactored into microservices if needed.
+
+## Technologies
+
+- **Backend:** NestJS, MongoDB, Mongoose
+- **Frontend:** React, Axios (or fetch)
+- **DevOps:** Docker, Docker Compose
+- **Optional:** AI-powered features (e.g., content suggestions, moderation)
