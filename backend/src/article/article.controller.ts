@@ -5,6 +5,8 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  UploadedFile,
+  UseInterceptors,
   Get,
   Param,
   Delete,
@@ -20,6 +22,9 @@ import {
   ApiQuery,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { UpdateArticleDto } from './dto/updateArticle.dto';
@@ -34,35 +39,56 @@ import { AuthGuard } from '@/user/guards/auth.guard';
 export class ArticleController {
   constructor(private readonly articleService: ArticleService) {}
 
+  // ✅ Create article with optional image
   @Post()
+  @UseGuards(AuthGuard)
+  @UsePipes(new ValidationPipe())
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}-${file.originalname}`);
+        },
+      }),
+    }),
+  )
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Create new article' })
+  @ApiOperation({ summary: 'Create new article with optional image' })
   @ApiBody({
-    description: 'Payload for creating a new article',
     schema: {
-      example: {
+      type: 'object',
+      properties: {
         article: {
-          title: 'How to use NestJS',
-          description: 'Learn how to create a backend using NestJS',
-          body: 'Full guide content here...',
-          tagList: ['nestjs', 'backend'],
+          type: 'object',
+          properties: {
+            title: { type: 'string' },
+            description: { type: 'string' },
+            body: { type: 'string' },
+            tagList: { type: 'array', items: { type: 'string' } },
+            image: { type: 'string', format: 'binary' }, // optional file
+          },
+          required: ['title', 'body'],
         },
       },
     },
   })
-  @ApiResponse({ status: 201, description: 'Article created successfully' })
-  @UseGuards(AuthGuard)
-  @UsePipes(new ValidationPipe())
   async createArticle(
     @User() user: UserEntity,
     @Body('article') createArticleDto: CreateArticleDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<IArticleResponse> {
-    const newArticle = await this.articleService.createArticle(
+    const imageUrl = file ? `/uploads/${file.filename}` : undefined;
+    const article = await this.articleService.createArticle(
       user,
       createArticleDto,
+      imageUrl,
     );
-    return this.articleService.generateArticleResponse(newArticle);
+    return this.articleService.generateArticleResponse(article);
   }
+
   @Get('feed')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get articles feed from followed users' })
@@ -74,7 +100,6 @@ export class ArticleController {
     @Query('limit') limit?: string,
     @Query('offset') offset?: string,
   ): Promise<IArticlesResponse> {
-    // Pass the query params as object to the service
     const query = { limit, offset };
     return await this.articleService.getFeed(currentUserId, query);
   }
@@ -173,10 +198,10 @@ export class ArticleController {
     @User('id') currentUserId: number,
     @Param('slug') slug: string,
   ): Promise<IArticleResponse> {
-    const removeArticle = await this.articleService.removeArticleFromFavorites(
+    const removedArticle = await this.articleService.removeArticleFromFavorites(
       currentUserId,
       slug,
     );
-    return this.articleService.generateArticleResponse(removeArticle);
+    return this.articleService.generateArticleResponse(removedArticle);
   }
 }

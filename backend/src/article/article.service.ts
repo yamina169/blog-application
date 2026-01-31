@@ -170,9 +170,9 @@ export class ArticleService {
   async createArticle(
     user: UserEntity,
     createArticleDto: CreateArticleDto,
+    image?: string, // optionnel
   ): Promise<ArticleEntity> {
     const article = new ArticleEntity();
-
     Object.assign(article, createArticleDto);
 
     if (!article.tagList) {
@@ -181,6 +181,10 @@ export class ArticleService {
 
     article.slug = this.generateSlug(article.title);
     article.author = user;
+
+    if (image) {
+      article.image = image;
+    }
 
     return await this.articleRepository.save(article);
   }

@@ -9,7 +9,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
 @Entity({ name: 'articles' })
 export class ArticleEntity {
   @PrimaryGeneratedColumn('increment')
@@ -29,6 +28,9 @@ export class ArticleEntity {
 
   @Column('simple-array')
   tagList: string[];
+
+  @Column({ nullable: true })
+  image?: string; // optional image
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
