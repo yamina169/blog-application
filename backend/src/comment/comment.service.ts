@@ -40,7 +40,10 @@ export class CommentService {
     return this.generateCommentResponse(savedComment);
   }
 
-  async getComments(slug: string): Promise<ICommentsResponse> {
+  async getComments(
+    slug: string,
+    query: { limit?: string; offset?: string } = {},
+  ): Promise<ICommentsResponse> {
     const article = await this.articleRepository.findOne({
       where: { slug },
     });
@@ -49,10 +52,27 @@ export class CommentService {
       throw new HttpException('Article not found', HttpStatus.NOT_FOUND);
     }
 
-    const comments = await this.commentRepository.find({
-      where: { article: { id: article.id } },
-      order: { createdAt: 'DESC' },
-    });
+    const { limit, offset } = query;
+
+    const take = limit !== undefined ? Number(limit) : undefined;
+    const skip = offset !== undefined ? Number(offset) : undefined;
+
+    // Build query with optional pagination
+    const queryBuilder = this.commentRepository
+      .createQueryBuilder('comment')
+      .leftJoinAndSelect('comment.author', 'author')
+      .where('comment.articleId = :articleId', { articleId: article.id })
+      .orderBy('comment.createdAt', 'DESC');
+
+    if (typeof take === 'number' && !isNaN(take)) {
+      queryBuilder.take(take);
+    }
+
+    if (typeof skip === 'number' && !isNaN(skip)) {
+      queryBuilder.skip(skip);
+    }
+
+    const comments = await queryBuilder.getMany();
 
     return this.generateCommentsResponse(comments);
   }

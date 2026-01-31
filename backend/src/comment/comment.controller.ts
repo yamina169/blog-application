@@ -5,10 +5,12 @@ import {
   Get,
   Param,
   Post,
+  Query, // ✅ add this
   UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+
 import {
   ApiTags,
   ApiOperation,
@@ -16,6 +18,7 @@ import {
   ApiParam,
   ApiBearerAuth,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 import { CommentService } from './comment.service';
@@ -34,13 +37,15 @@ export class CommentController {
   @Get(':slug/comments')
   @ApiOperation({ summary: 'Get all comments for an article' })
   @ApiParam({ name: 'slug', description: 'Slug of the article' })
-  @ApiResponse({
-    status: 200,
-    description: 'List of comments retrieved successfully',
-    type: Object, // ici on peut mettre un DTO ou interface si souhaité
-  })
-  async getComments(@Param('slug') slug: string): Promise<ICommentsResponse> {
-    return await this.commentService.getComments(slug);
+  @ApiQuery({ name: 'limit', required: false })
+  @ApiQuery({ name: 'offset', required: false })
+  async getComments(
+    @Param('slug') slug: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ): Promise<ICommentsResponse> {
+    const query = { limit, offset };
+    return await this.commentService.getComments(slug, query);
   }
 
   @Post(':slug/comments')
