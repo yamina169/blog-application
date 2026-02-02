@@ -1,20 +1,17 @@
-#  Image Node légère
 FROM node:20-alpine
 
-# Définir le dossier de travail
 WORKDIR /app
 
-#  Copier package.json et package-lock.json pour installer les dépendances
 COPY package*.json ./
 
-#  Installer toutes les dépendances
-RUN npm install
+# Install all dependencies (including dev)
+RUN npm install --legacy-peer-deps
 
-#  Copier le code source
 COPY . .
 
-#  Exposer le port de l'application
+# Build using local CLI
+RUN npx nest build
+
 EXPOSE 3000
 
-#  Commande pour lancer NestJS en mode développement (hot reload)
-CMD ["npm", "run", "start:dev"]
+CMD ["node", "dist/main"]

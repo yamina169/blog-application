@@ -1,54 +1,57 @@
 version: "3.8"
 
 services:
-  # PostgreSQL Database
-  db:
+  postgres:
     image: postgres:16
-    container_name: social_db
-    ports:
-      - "5432:5432"
+    container_name: postgres_db
+    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: blog
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
-  # MinIO (S3 local)
   minio:
     image: minio/minio
-    container_name: minio
-    ports:
-      - "9000:9000" # API
-      - "9001:9001" # Console UI
+    container_name: minio_storage
     command: server /data --console-address ":9001"
-    env_file:
-      - ./backend/.env # récupère MINIO_ROOT_USER et MINIO_ROOT_PASSWORD depuis .env
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     volumes:
-      - ./backend/minio_data:/data # stockage persistant dans backend/minio_data
-
-  # Backend NestJS
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: social_backend
+      - minio_data:/data
     ports:
-      - "3000:3000"
+      - "9000:9000"
+      - "9001:9001"
+
+  backend:
+    build: ./backend
+    container_name: nest_backend
+    restart: always
+    depends_on:
+      - postgres
+      - minio
     env_file:
       - ./backend/.env
-    volumes:
-      - ./backend:/app
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build: ./frontend
+    container_name: vite_frontend
     depends_on:
-      - db
-      - minio
-    networks:
-      - social-network
-    command: npm run start:dev
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    command: npm run dev -- --host
 
 volumes:
-  pgdata: {} # volume persistant pour PostgreSQL
-
-networks:
-  social-network:
-    driver: bridge
+  postgres_data:
+  minio_data:
