@@ -1,6 +1,6 @@
-#  Tech TN Blog
+#  Tech TN 
 
-**Tech TN Blog** is a full-stack application for publishing and managing articles with images, favorites, and comments, and for dynamically displaying the latest news.
+**Tech TN** is a full-stack application for publishing and managing articles with images, favorites, and comments, and for dynamically displaying the latest news.
 
 ### Stack:
 
