@@ -1,142 +1,120 @@
-# Social App
+#Tech TN Blog
 
-Welcome to the **Social App**, a **full-stack application** built with **React** for the frontend and **NestJS** for the backend, with **MinIO** for file storage.
+**Tech TN Blog** is a full-stack application for publishing and managing articles with images, favorites, and comments, and for dynamically displaying the latest news.
 
-This app enables:
+### Stack:
 
-- User registration and authentication
-- Profile management
-- Article publishing and management
-- Tag interaction
-- Social features like following users and favoriting articles
-- File uploads with metadata (title, uploadedBy) stored in **MinIO**
+* **Frontend**: React + Vite
+* **Backend**: NestJS + PostgreSQL
+* **Image Storage**: MinIO (S3 compatible)
+* **News API**: [NewsData.io](https://newsdata.io/) for fetching the latest news
+* **Swagger UI**: for easy backend endpoint testing
 
 ---
 
 ## 🚀 Features
 
-- User registration and login
-- Article CRUD (Create, Read, Update, Delete)
-- Tag retrieval
-- Follow/unfollow users and retrieve profiles
-- Favorite/unfavorite articles
-- Feed of articles from followed users
-- File upload with metadata to **MinIO**
+### Users
 
----
+* Register (`register`)
+* Login (`login`)
+* User profile management (name, avatar, bio)
 
-## 🔐 Authorization
+### Articles / Blogs
 
-Protected endpoints require a **valid JWT token** in the `Authorization` header:
+* Full CRUD: Create, Read, Update, Delete
+* Favorites: add or remove articles from favorites
+* Comments: create, update, delete
+* Each article can have **an image stored on MinIO**
 
-```
-Authorization: Bearer <your-jwt-token>
-```
+### News
+
+* Fetch and display **latest news dynamically** using [NewsData.io](https://newsdata.io/)
+* Display on the frontend as a list of recent articles
+
+### Swagger UI
+
+* **Interactive backend documentation** for testing all endpoints easily
+* Accessible at: `http://localhost:3000/api`
 
 ---
 
 ## ⚙️ Environment Variables
 
-Create a `.env` file in the backend root directory:
+### Backend `.env`
 
 ```env
-# App variables
+# App
 PORT=3000
-JWT_SECRET=your_jwt_secret_key
+JWT_SECRET=your_jwt_secret
 JWT_EXPIRES_IN=3600s
 
-# PostgreSQL (local development)
+# PostgreSQL
 DB_HOST=localhost
 DB_PORT=5432
 DB_USER=postgres
 DB_PASSWORD=postgres
-DB_NAME=blog
+DB_NAME=tech_tn_blog
 
-# MinIO (local S3 storage)
+# MinIO
 MINIO_ENDPOINT=http://localhost:9000
 MINIO_ACCESS_KEY=minioadmin
 MINIO_SECRET_KEY=minioadmin
-MINIO_BUCKET=files
+MINIO_BUCKET=article-images
+
+# News API
+NEWS_API_KEY=your_newsdata_api_key
 ```
 
-> **Note:** Adjust database and MinIO variables to match your local setup.
+### Frontend `.env`
+
+```env
+VITE_API_URL=http://localhost:3000/api
+```
 
 ---
 
-## 📖 Backend Documentation
+## 🔧 Installation
 
-Swagger UI is available at:
-
-```
-http://localhost:3000/api
-```
-
-Use it to explore backend endpoints, try requests, and inspect response schemas interactively.
-
----
-
-## 🏁 Getting Started
-
-### Backend
-
-1. **Clone the repository**
+1. Clone the repository:
 
 ```bash
 git clone <repository-url>
-cd <repository-folder>/backend
 ```
 
-2. **Install dependencies**
+2. Install dependencies:
 
 ```bash
+cd backend
+npm install
+
+cd ../frontend
 npm install
 ```
 
-3. **Configure environment**
-
-- Create a `.env` file as shown above
-- Ensure PostgreSQL is running locally
-- Ensure MinIO is running for file uploads:
-
-```bash
-docker-compose up -d minio
-```
-
-4. **Start the server**
+3. Start the backend:
 
 ```bash
 npm run start:dev
 ```
 
----
-
-### Frontend
-
-1. **Navigate to frontend folder**
+4. Start the frontend:
 
 ```bash
-cd ../frontend
+npm run dev
 ```
 
-2. **Install dependencies**
-
-```bash
-npm install
-```
-
-3. **Start the frontend**
-
-```bash
-npm start
-```
-
-The React app will open in your browser (default `http://localhost:3000`) and communicate with the backend API.
+5. Access the frontend at: `http://localhost:5173`
+6. Test backend endpoints with Swagger at: `http://localhost:3000/api`
 
 ---
 
-## ⚡ Notes on File Uploads
+## 🐳 Run with Docker
 
-- Supports **title** and **uploadedBy** metadata
-- Max file size: **5 MB**
-- Allowed types: images (`jpg`, `jpeg`, `png`, `gif`)
-- Files are stored in **MinIO**; metadata can be retrieved via API
+To run the **entire project with Docker**, use Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+* Backend:
